@@ -1,5 +1,4 @@
 defmodule AdventOfCode.Day25 do
-
   def constellations(normalized_points) do
     sorted_points =
       normalized_points |> Enum.sort(&(manhattan_distance(&1) <= manhattan_distance(&2)))
@@ -21,12 +20,20 @@ defmodule AdventOfCode.Day25 do
       [] ->
         Map.put(constellations, point, constellation_coordinates |> List.flatten() |> Enum.uniq())
 
-      [ {parent, _parent_coords} | constellations_to_merge] -> constellations_to_merge |> Enum.reduce(constellations, fn({ck, cv}, acc) ->
-        Map.update!(
-          acc,
+      [{parent, _parent_coords} | constellations_to_merge] ->
+        constellations_to_merge
+        |> Enum.reduce(constellations, fn {ck, cv}, acc ->
+          Map.update!(
+            acc,
+            parent,
+            &[&1 | [cv]]
+          )
+          |> Map.delete(ck)
+        end)
+        |> Map.update!(
           parent,
-          &([&1 | [cv]])) |> Map.delete(ck)
-      end) |> Map.update!(parent, &([&1 | [constellation_coordinates]] |> List.flatten |> Enum.uniq))
+          &([&1 | [constellation_coordinates]] |> List.flatten() |> Enum.uniq())
+        )
 
       _ ->
         throw(point)
@@ -43,7 +50,7 @@ defmodule AdventOfCode.Day25 do
   end
 
   defp find_constellation_coordinates(x, index, sorted_points) do
-    Enum.slice(sorted_points, (index)..-1)
+    Enum.slice(sorted_points, index..-1)
     |> Enum.reduce_while([x], fn e, acc ->
       if abs(manhattan_distance(x) - manhattan_distance(e)) > 3 do
         {:halt, acc}
@@ -64,7 +71,9 @@ defmodule AdventOfCode.Day25 do
         min_coordinates(p, acc)
       end)
 
-    points |> Enum.map(fn {p1, p2, p3, p4} -> {p1 - m1, p2 - m2, p3 - m3, p4 - m4} end) |>  IO.inspect
+    points
+    |> Enum.map(fn {p1, p2, p3, p4} -> {p1 - m1, p2 - m2, p3 - m3, p4 - m4} end)
+    |> IO.inspect()
   end
 
   def file_to_points(file_name) do
