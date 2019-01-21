@@ -1,24 +1,24 @@
 defmodule AdventOfCode.Day10 do
   def decode_message(points_and_velocities, start_second, end_second) do
-   y_range =  start_second..end_second
-    |> Enum.map(fn current_second ->
-      points =
-        points_and_velocities
-        |> Enum.map(fn {{x, y}, {vx, vy}} ->
-          {x + (vx * current_second), y + (vy * current_second)}
-        end)
+    y_range =
+      start_second..end_second
+      |> Enum.map(fn current_second ->
+        points =
+          points_and_velocities
+          |> Enum.map(fn {{x, y}, {vx, vy}} ->
+            {x + vx * current_second, y + vy * current_second}
+          end)
 
-      {{start_x, start_y}, {end_x, end_y}} = border = border(points)
-      grid = fill_grid(points, border)
-      layout = draw_grid_fast(grid, border)
-      IO.puts(layout)
-#      :timer.sleep(1000)
-      {current_second, (end_y - start_y), (end_x - start_x)}
-    end)
+        {{start_x, start_y}, {end_x, end_y}} = border = border(points)
+        grid = fill_grid(points, border)
+        layout = draw_grid_fast(grid, border)
+        IO.puts(layout)
+        #      :timer.sleep(1000)
+        {current_second, end_y - start_y, end_x - start_x}
+      end)
 
-#   sort y range because the message will appear when the y range is minimum. Otherwise it'll be slow
-    Enum.sort(y_range, fn {_, range1, _}, {_, range2, _} -> range1<range2  end) |> Enum.take(10)
-
+    #   sort y range because the message will appear when the y range is minimum. Otherwise it'll be slow
+    Enum.sort(y_range, fn {_, range1, _}, {_, range2, _} -> range1 < range2 end) |> Enum.take(10)
   end
 
   defp fill_grid(points, border = {{start_x, start_y}, {end_x, end_y}}) do
@@ -34,7 +34,8 @@ defmodule AdventOfCode.Day10 do
       grid
       |> Enum.group_by(fn {{x, y}, _} -> y end, fn {{x, y}, _} -> x end)
       |> Enum.sort()
-#      |> IO.inspect()
+
+    #      |> IO.inspect()
 
     {_, row_vals} =
       Enum.reduce(grouped_grid, {0, []}, fn {y, x_coordinates}, {last_y, col_val} ->
@@ -42,10 +43,11 @@ defmodule AdventOfCode.Day10 do
         row = String.pad_leading("", offset_y - last_y, "\n")
 
         row =
-          Enum.map(x_coordinates, &(&1 - start_x)) |> Enum.sort
+          Enum.map(x_coordinates, &(&1 - start_x))
+          |> Enum.sort()
           |> Enum.reduce({-1, row}, fn x, {last_x, row_val} ->
             hash_val = String.pad_trailing("", x - last_x - 1) <> "#"
-            {x, row_val<>hash_val}
+            {x, row_val <> hash_val}
           end)
 
         {offset_y, [row | col_val]}
