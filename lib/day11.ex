@@ -16,15 +16,16 @@ defmodule AdventOfCode.Day11 do
       1..size
       |> Task.async_stream(
         fn x ->
-          {:ok, row_max} = 1..size
-          |> Task.async_stream(
-            fn y ->
-              sum_squares = sum_squares_max(x, y, size, power_grid)
-              {{x, y}, sum_squares}
-            end,
-            options
-          )
-          |> Enum.max_by(fn {:ok, {_, {_s, v}}} -> v end)
+          {:ok, row_max} =
+            1..size
+            |> Task.async_stream(
+              fn y ->
+                sum_squares = sum_squares_max(x, y, size, power_grid)
+                {{x, y}, sum_squares}
+              end,
+              options
+            )
+            |> Enum.max_by(fn {:ok, {_, {_s, v}}} -> v end)
 
           row_max
         end,
